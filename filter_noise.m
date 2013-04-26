@@ -8,7 +8,7 @@ back_max = 255;
 % max out the zeros because same are in the background
 
 %image(image==0)=(back_max+1)/2-1;
-NOISE_THRESHOLD = 50;
+NOISE_THRESHOLD = 40;
 
 [X,Y] = find(image>NOISE_THRESHOLD);
 for i=1:L
