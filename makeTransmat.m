@@ -1,11 +1,11 @@
-function transmat = makeTransmat(numFrame,pNext, pLoop, pSkip, numSkip) 
+function transmat = makeTransmat(numFrame, pNext, pLoop, pSkip, numSkip) 
 
 m = numFrame; 
 
 transmat = zeros(m);
 
-transmat(1,1) = 1- pNext;
-transmat(1,2) = pNext;
+transmat(1,1) = 0.99;
+transmat(1,2) = 0.01;
 transmat(m,m) = 1-pNext;
 
 transmat(m,1) = pNext; 

@@ -32,7 +32,7 @@ if scaled
   [delta(:,t), n] = normalise(delta(:,t));
   scale(t) = 1/n;
 end
-psi(:,t) = 0; % arbitrary value, since there is no predecessor to t=1
+psi(:,t) = 1; % arbitrary value, since there is no predecessor to t=1
 for t=2:T
   for j=1:Q
     [delta(j,t), psi(j,t)] = max(delta(:,t-1) .* transmat(:,j));
@@ -52,11 +52,11 @@ end
 % If scaled==1, p = Pr(replace sum with max and proceed as in the scaled forwards algo)
 % Both are different from p(data) as computed using the sum-product (forwards) algorithm
 
-if 0
+if 1
 if scaled
-  loglik = -sum(log(scale));
+  loglik = -sum(log(scale))
   %loglik = prob_path(prior, transmat, obslik, path);
 else
-  loglik = log(p);
+  loglik = log(p)
 end
 end

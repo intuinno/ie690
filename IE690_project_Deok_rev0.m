@@ -125,8 +125,8 @@ if training == 1
     end
 
 % find variance of edgeX, edgeY
-sigmaX = var(edgeX./120)^0.5;
-sigmaY = var(edgeY./180)^0.5;    
+sigmaX = var(edgeX./120 - 1)^0.5;
+sigmaY = var(edgeY./180 - 1)^0.5;    
 end
 
 
@@ -165,30 +165,24 @@ if validation == 1
             
             for j=1:length(all_features(i).gesture)                
                 % edge points in a frame
-                P = all_features(i).gesture(j).frame;
+                P = all_features(i).gesture(j).frame;    
 
-                if length(P) > 0 && length(T) > 0
-                    % An alternative sort to speed up things!
-                    m = size(T,1); n = size(P,1);
-                    [c,p] = sortrows([T;P]);
-                    q = 1:m+n; q(p) = q;
-                    t = cumsum(p>m);
-                    r = 1:n; r(t(q(m+1:m+n))) = r;
-                    s = t(q(1:m));
-                    id = r(max(s,1));
-                    iu = r(min(s+1,n));
-                    %[prob,it] = max([-((((T(:, 1)-P(id, 1))./240).^2)/(2*sigmaX^2)+(((T(:, 2)-P(id, 2))./360).^2)/(2*sigmaY^2)) -((((P(iu, 1)-T(:, 1))./240).^2)/(2*sigmaX^2)+(((P(iu, 2)-T(:, 2))./360).^2)/(2*sigmaY^2))], [], 2);
-                    [prob,it] = max([-((((T(:, 1)-P(id, 1))./120).^2)/(2*sigmaX^2)+(((T(:, 2)-P(id, 2))./180).^2)/(2*sigmaY^2)) -((((P(iu, 1)-T(:, 1))./120).^2)/(2*sigmaX^2)+(((P(iu, 2)-T(:, 2))./180).^2)/(2*sigmaY^2))], [], 2);
+                % An alternative sort to speed up things!
+                m = size(T,1); n = size(P,1);
+                [c,p] = sortrows([T;P]);
+                q = 1:m+n; q(p) = q;
+                t = cumsum(p>m);
+                r = 1:n; r(t(q(m+1:m+n))) = r;
+                s = t(q(1:m));
+                id = r(max(s,1));
+                iu = r(min(s+1,n));
+                [prob,it] = max([-((((T(:, 1)-P(id, 1))./240).^2)/(2*sigmaX^2)+(((T(:, 2)-P(id, 2))./360).^2)/(2*sigmaY^2)) -((((P(iu, 1)-T(:, 1))./240).^2)/(2*sigmaX^2)+(((P(iu, 2)-T(:, 2))./360).^2)/(2*sigmaY^2))], [], 2);
 
+                local_prob = sum(prob);
 
-                    local_prob = sum(prob) + length(T)*log(length(T)/length(P));
+                % update B -- the emission matrix
+                B(j, frame) = exp(sum(prob));
 
-                    % update B -- the emission matrix
-                    B(j, frame) = (sum(prob));
-                else
-                    B(j, frame) = 1;
-                end
-                
                 % get the best match
 %                 global_prob = local_prob;
 %                 if max_global < global_prob
@@ -206,41 +200,24 @@ if validation == 1
 	end
 
 	path = [];
-    
-    path2 = [];
+	path2 = [];
+	figure;
 	for i= 1:length(all_features)
 		i
-		numFrame = length(all_features(i).gesture);
+		numFrame = length(all_features(i).gesture)
 		numFrameTest = length(movie_features); 
 		prior = 1/numFrameTest * ones(numFrame,1);
-		transmat = makeTransmat(numFrame, 0.9, 0.05, 0.05, 10);
-		[path] = viterbi_path(prior, transmat, obsLik(i).B)
-        
-        b =  obsLik(i).B;
-        % analyse the path - probability
-        probabilities = [];
-        probability = 0;
-        gesture = 0;
-        for frame=(length(path)):-1:2
-            if (((path(frame) - path(frame-1)) > 0) && (path(frame) > (numFrame -5)) && (gesture == 0))
-                probability = probability+b(path(frame), frame)+log(transmat(path(frame-1), path(frame))) ;
-                gesture = frame
-            end
-            if (path(frame) < 5 && (gesture - frame) > numFrame/4 && gesture > 0 )
-                probabilities = [probabilities; probability];
-                probability = 0;
-                frame
-                gesture = 0;
-            
-            elseif (frame == 2 && (gesture - frame) > 10  && gesture > 0)
-                gesture = 0;
-                probabilities = [probabilities; probability];
-                frame
-                break;
-            end
-        end
-        probabilities
-        
+		priorFirst = (numFrameTest - ;
+		prior3 = [priorFirst; prior];
+		
+		transmat = makeTransmat(numFrame+1, 0.9, 0.05, 0.05, 1);
+		
+		b = obsLik(i).B;
+		
+		c = [mean(b,1); b];
+		
+		[path] = viterbi_path(prior3, transmat, c)
+		subplot(3,4,i), plot(path);
 		path2 = [path2; struct('Path',path)];	
 	end
 	

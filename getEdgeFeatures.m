@@ -17,7 +17,7 @@ function [movie_features, EdgeX, EdgeY] = getEdgeFeatures(K0)
 %% ================== Find Edge Features ====================================
 
     %thresholds should be dependent on histogram 
-    THRESHOLD_FEATURE = 0.07;
+    THRESHOLD_FEATURE = 0.075;
     THRESHOLD_NOISE = 0.12;
     THRESHOLD_MAGNITUDE = 70;
 
@@ -72,8 +72,10 @@ function [movie_features, EdgeX, EdgeY] = getEdgeFeatures(K0)
 
         % remove the back ground noise using the gradient values
         %[Ix, Iy] = find(((Gx.^2 + Gy.^2).^(0.5) > THRESHOLD_FEATURE) - ((Gx.^2 + Gy.^2).^(0.5) > THRESHOLD_NOISE & K(i).cdata(:,:,1) < THRESHOLD_MAGNITUDE));
-        [Px, Py] = find(((Gx.^2 + Gy.^2).^(0.5)> THRESHOLD_FEATURE));
-
+        [Px, Py] = find(((Gx.^2 + Gy.^2).^(0.5)> THRESHOLD_FEATURE & motion > 0));
+        %Px = Px - mean(Px);
+        %Py = Py - mean(Py);
+        
         EdgeX = [EdgeX; Px];
         EdgeY = [EdgeY; Py];
         
@@ -102,6 +104,11 @@ function [movie_features, EdgeX, EdgeY] = getEdgeFeatures(K0)
 
         %movie_features = [movie_features, struct('frame', frame_features)];
         movie_features = [movie_features, struct('frame', result)];
+        
+        %show edge image
+        figure 
+        imshow((Gx.^2 + Gy.^2).^(0.5)> THRESHOLD_FEATURE & motion > 0);
+        
         
         Edges(i).cdata = (Gx.^2 + Gy.^2).^(0.5)> THRESHOLD_FEATURE;
         %figure 
