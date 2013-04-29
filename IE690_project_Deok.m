@@ -21,30 +21,23 @@ Ix = imfilter(double(I), hx, 'replicate');
 gradmag = sqrt(Ix.^2 + Iy.^2);
 figure, imshow(gradmag,[]), title('Gradient magnitude (gradmag)')
 
+figure, BW1 = edge(I,'prewitt');
+imshow(BW1);
 
-%Opening 
-se = strel('disk', 10);
-Io = imopen(I, se);
-figure, imshow(Io), title('Opening (Io)')
+figure, BW1 =  edge(I, 'canny');
+imshow(BW1);
+
+figure, BW1 = edge(I, 'zerocross');
+imshow(BW1);
+
+figure, BW1 = edge(I, 'log');
+imshow(BW1);
+
+figure, BW1 = edge(I,'roberts');
+imshow(BW1);
+
+figure, BW1 = edge(I,'sobel');
+imshow(BW1);
 
 
-%Closing
-Ie = imerode(I, se);
-Iobr = imreconstruct(Ie, I);
-figure, imshow(Iobr), title('Opening-by-reconstruction (Iobr)')
-
-Iobrd = imdilate(Iobr, se);
-Iobrcbr = imreconstruct(imcomplement(Iobrd), imcomplement(Iobr));
-Iobrcbr = imcomplement(Iobrcbr);
-figure, imshow(Iobrcbr), title('Opening-closing by reconstruction (Iobrcbr)')
-
-
-I = Iobrcbr;
-
-hy = fspecial('sobel');
-hx = hy';
-Iy = imfilter(double(I), hy, 'replicate');
-Ix = imfilter(double(I), hx, 'replicate');
-gradmag = sqrt(Ix.^2 + Iy.^2);
-figure, imshow(gradmag,[]), title('Gradient magnitude (gradmag)')
 
