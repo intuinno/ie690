@@ -78,18 +78,26 @@ for i = 0:255
 	
 end
 
-Inoise = (gradmag > 100) & (I < noiseIndex);
-SE = strel('disk',1,0);
-Inoise = imdialate(Inoise,SE);
+Inoise = (gradmag > 50) & (I < noiseIndex);
+%SE = strel('disk',1,0);
+%Inoise = imdilate(Inoise,SE);
+Inoise = imfill(Inoise,'holes');
+
+[row col] = find(Inoise);
+Inoise2 = I;
+
+for i=1:length(row)
+	Inoise2(row(i),col(i)) = NaN;
+end
 
 
 
-figure, imshow(Inoise);
-
-
-
-Inoise2 = immultiply(I,~Inoise) + uint8(Inoise*255);
-figure, imshow(Inoise2);
+% figure, imshow(Inoise);
+% 
+% 
+% 
+% Inoise2 = immultiply(I,~Inoise) + uint8(Inoise*255);
+% figure, imshow(Inoise2);
 
 
 
