@@ -8,7 +8,7 @@ function [movie_features, EdgeX, EdgeY] = getEdgeFeatures2(K0)
 %% ================== Find Edge Features ====================================
 
     %thresholds should be dependent on histogram 
-    THRESHOLD_FEATURE = 0.11;
+   
 
     % preallocate
     EdgeX = [];
@@ -19,40 +19,13 @@ function [movie_features, EdgeX, EdgeY] = getEdgeFeatures2(K0)
     
     for i = 1:length(K)
 
-        
-        image = rgb2gray(K(i).cdata);
-        f =  im2double(rgb2gray(K(i).cdata));
-        [Gx, Gy] = gradient(f);
-        
-        %Get foreground
-        fgm = imregionalmin(image);
-        image(fgm) = 255;
-
-        %motion region
-        motion = zeros(size(rgb2gray(K(1).cdata)));
-        if (i>1)
-            motion = (rgb2gray(K(1).cdata) - rgb2gray(K(i).cdata));    
-        end
-
-        fgm = imregionalmin(motion);
-        motion(fgm) = 0;
-        fgm = find(motion<30);
-        motion(fgm) = 0;
-        % open and close to get rid of noise
-        motion = imerode(motion, ones(3));
-        motion = imdilate(motion, ones(3));
-        motion = imerode(motion, ones(3));
-        motion = imdilate(motion, ones(3));
-        motion = imerode(motion, ones(3));
-        motion = imdilate(motion, ones(3));
-        motion = imdilate(motion, ones(5));
-        [Mx, My] = find(motion);
-        M = [Mx My]; 
-        motion_bool = zeros(size(K(i).cdata(:, :, 1)));
-
+             
         
         %Deok's Code for edge features
         I = K(i).cdata(:, :, 1);
+        
+        %figure, subplot(1,2,1), image(I), colormap(jet(256));
+        
         I = removeNoise(I);
         I = removeNoise(I);
 
@@ -64,7 +37,7 @@ function [movie_features, EdgeX, EdgeY] = getEdgeFeatures2(K0)
         % figure, imhist(I);
 
         I4 = double(I/256);
-        [BW thresh] = edge(I4, 'canny',[0.014, 0.3]);
+        [BW thresh] = edge(I4, 'canny',[0.1, 0.3]);
 
         % figure, imshow(BW), title('canny');
         % 
@@ -112,8 +85,8 @@ function [movie_features, EdgeX, EdgeY] = getEdgeFeatures2(K0)
             end
         end
         
-        figure 
-        imshow(BW4)
+        %subplot(1,2,2), image( BW4*255), title(num2str(i));
+
         
         [Px, Py] = find(BW4);
         

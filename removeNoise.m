@@ -1,7 +1,7 @@
 function removeNoiseImage = removeNoise(I)
 
 NUM_NOISE_THRESHOLD = 0.05;
-NUM_NOISE_GRAD_THRESHOLD = 50;
+NUM_NOISE_GRAD_THRESHOLD = 100;
 
 
 %Appy Sobel to extract edge
@@ -35,7 +35,7 @@ Inoise = (gradmag > NUM_NOISE_GRAD_THRESHOLD) & (I < noiseIndex);
 SE = strel('disk',1,0);
 Inoise = imdilate(Inoise,SE);
 Inoise = imfill(Inoise,'holes');
-%figure, imshow(Inoise);
+%figure, image(Inoise*255);
 
 
 [L num] = bwlabel(Inoise);
@@ -54,18 +54,18 @@ end
 %figure, imshow(Inoise2);
 
 Inoise3 = Inoise2;
-
+%h = figure;
 while(find(isnan(Inoise3))) 
 	Inoise3 = nlfilter(Inoise3, [3,3], @neighError);
-%	figure, imshow(Inoise3);
+ %   image(Inoise3);
 end
-
+%close(h);
 for i = 1:m 
 	
-	if Inoise3(i,1) < 5 
+	if Inoise3(i,1) < 10 
 		
 		j = 1;
-		while (Inoise3(i,j ) <5 )
+		while (Inoise3(i,j ) <10 )
 			j = j + 1;
 		end
 		
@@ -77,10 +77,10 @@ for i = 1:m
 		
 	end
 	
-	if Inoise3(i, n) <5 
+	if Inoise3(i, n) <10 
 		
 		j=1;
-		while(Inoise3(i,n-j) <5) 
+		while(Inoise3(i,n-j) <10) 
 			j= j+1;
 		end
 		
@@ -95,10 +95,10 @@ end
 
 for i = 1:n 
 	
-	if Inoise3(1,i) < 5 
+	if Inoise3(1,i) < 10 
 		
 		j = 1;
-		while (Inoise3(j,i ) <5 )
+		while (Inoise3(j,i ) <10 )
 			j = j + 1;
 		end
 		
@@ -110,10 +110,10 @@ for i = 1:n
 		
 	end
 	
-	if Inoise3(m, i) <5 
+	if Inoise3(m, i) <10 
 		
 		j=1;
-		while(Inoise3(m-j,i) <5) 
+		while(Inoise3(m-j,i) <10) 
 			j= j+1;
 		end
 		

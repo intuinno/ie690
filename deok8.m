@@ -5,25 +5,23 @@ clear
 NUM_DEPTH_THRESHOLD = 10;
 NUM_NOISE_THRESHOLD = 0.05;
 
-load sampleMovie
+load temp
 
 
 
 %
 colormap(jet);
 
-for frameNum = 1:length(K0)
+frameNum = 16;
 
 I = K0(frameNum).cdata(:,:,1);
 
-figure, subplot(1,2,1), image(I), colormap(jet(256));
+figure,  image(I), colormap(jet(256));
 
 I = removeNoise(I);
-
+figure,  image(I), colormap(jet(256));
 I = removeNoise(I);
-
-I2 = I/NUM_DEPTH_THRESHOLD;
-I3 = I2*NUM_DEPTH_THRESHOLD;
+figure,  image(I), colormap(jet(256));
 
 
 % figure, imshow(I3), colormap('jet');
@@ -37,7 +35,7 @@ I4 = double(I/256);
 
 [BW thresh] = edge(I4, 'canny',[0.014, 0.3]);
 
-% figure, imshow(BW), title('canny');
+figure, image(BW*255), title('canny');
 
 
 % 
@@ -99,6 +97,6 @@ for i=1:num
 	
 end
 
-subplot(1,2,2), image( BW4*255), title(num2str(frameNum));
+figure, image( BW4*255), title(num2str(i));
 
-end
+
