@@ -1,0 +1,148 @@
+function [movie_features, EdgeX, EdgeY] = getEdgeFeatures2(K0)
+
+%% ================== GET RID OF NOISE ======================================
+% 
+%     %K = remove_noise(K0);
+%     K = K0;
+%     SE = ones(5);
+%     for i = 1:length(K)
+%         K(i).cdata(:, :, 1) = imdilate(K0(i).cdata(:, :, 1), SE);
+%         K(i).cdata(:, :, 2) = imdilate(K0(i).cdata(:, :, 1), SE);
+%         K(i).cdata(:, :, 3) = imdilate(K0(i).cdata(:, :, 1), SE);
+%          K(i).cdata = imresize(K(i).cdata,0.5);
+%     end
+
+   
+    %play_movie(K);
+
+
+%% ================== Find Edge Features ====================================
+
+    %thresholds should be dependent on histogram 
+    THRESHOLD_FEATURE = 0.11;
+
+    % preallocate
+    EdgeX = [];
+    EdgeY = [];
+    
+    movie_features = [];
+    
+    
+    for i = 1:length(K)
+
+        
+        image = rgb2gray(K(i).cdata);
+        f =  im2double(rgb2gray(K(i).cdata));
+        [Gx, Gy] = gradient(f);
+        
+        %Get foreground
+        fgm = imregionalmin(image);
+        image(fgm) = 255;
+
+        %motion region
+        motion = zeros(size(rgb2gray(K(1).cdata)));
+        if (i>1)
+            motion = (rgb2gray(K(1).cdata) - rgb2gray(K(i).cdata));    
+        end
+
+        fgm = imregionalmin(motion);
+        motion(fgm) = 0;
+        fgm = find(motion<30);
+        motion(fgm) = 0;
+        % open and close to get rid of noise
+        motion = imerode(motion, ones(3));
+        motion = imdilate(motion, ones(3));
+        motion = imerode(motion, ones(3));
+        motion = imdilate(motion, ones(3));
+        motion = imerode(motion, ones(3));
+        motion = imdilate(motion, ones(3));
+        motion = imdilate(motion, ones(5));
+        [Mx, My] = find(motion);
+        M = [Mx My]; 
+        motion_bool = zeros(size(K(i).cdata(:, :, 1)));
+
+        
+        %Deok's Code for edge features
+        I = K(i).cdata(:, :, 1);
+        I = removeNoise(I);
+        I = removeNoise(I);
+
+        I2 = I/NUM_DEPTH_THRESHOLD;
+        I3 = I2*NUM_DEPTH_THRESHOLD;
+
+        % figure, imshow(I3), colormap('jet');
+        % 
+        % figure, imhist(I);
+
+        I4 = double(I/256);
+        [BW thresh] = edge(I4, 'canny',[0.014, 0.3]);
+
+        % figure, imshow(BW), title('canny');
+        % 
+        % [BW thresh] = edge(I4, 'sobel');
+        % 
+        % figure, imshow(BW),title('sobel');
+        % 
+        % [BW thresh] = edge(I4, 'prewitt');
+        % 
+        % figure, imshow(BW),title('prewitt');
+        % 
+        % 
+        % 
+        % [BW thresh] = edge(I4, 'log');
+        % 
+        % figure, imshow(BW),title('log');
+        % 
+
+
+        level = graythresh(I4);
+        I4( find(I4 > level) ) = 1; 
+        BW2 = im2bw(I4, level);
+        [L num] = bwlabel (~BW2,8);
+        for j=1:num
+            if  length( find(L == j) ) < 100 
+                BW2( find(L ==j) ) = 1;
+            end
+        end
+
+        SE = strel('disk',3,0);
+        BW3 = imdilate(~BW2,SE);
+
+        BW4 = BW & BW3; 
+
+        % figure, imshow( BW4);
+
+
+        [L num] = bwlabel (BW4,8);
+
+        for j=1:num
+
+            if  length( find(L == j) ) < 10 
+
+                BW4( find(L == ) ) = 0;
+
+            end
+
+        end
+        
+        % Karthik: remove the back ground noise using the gradient values
+        %[Px, Py] = find(((Gx.^2 + Gy.^2).^(0.5)> THRESHOLD_FEATURE));
+
+        
+        
+        
+        EdgeX = [EdgeX; Px];
+        EdgeY = [EdgeY; Py];
+        
+        result = [Px Py];
+        
+        
+        movie_features = [movie_features, struct('frame', result)];
+        
+        %show edge image
+        %figure 
+        %imshow((Gx.^2 + Gy.^2).^(0.5)> THRESHOLD_FEATURE);
+        
+        
+end
+

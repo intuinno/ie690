@@ -36,7 +36,7 @@ if example_num==1
     [K0, fps]=read_movie([data_dir '/' data_name  '_K_' num2str(movie_num) '.avi']); 
     [M0, fps]=read_movie([data_dir '/' data_name  '_M_' num2str(movie_num) '.avi']); 
     fprintf(' Done!\n\n');
-    movie_features = getEdgeFeatures(K0);
+    movie_features = getEdgeFeatures2(K0);
 
 elseif example_num==2
 	batch_num=3;  movie_num=16; 
@@ -48,7 +48,7 @@ elseif example_num==2
     [K0, fps]=read_movie([data_dir '/' data_name  '_K_' num2str(movie_num) '.avi']); 
     [M0, fps]=read_movie([data_dir '/' data_name  '_M_' num2str(movie_num) '.avi']); 
     fprintf(' Done!\n\n');
-    movie_features = getEdgeFeatures(K0);
+    movie_features = getEdgeFeatures2(K0);
 
 elseif example_num==3
     batch_num=15;  movie_num=24; 
@@ -60,7 +60,7 @@ elseif example_num==3
     [K0, fps]=read_movie([data_dir '/' data_name  '_K_' num2str(movie_num) '.avi']); 
     [M0, fps]=read_movie([data_dir '/' data_name  '_M_' num2str(movie_num) '.avi']); 
     fprintf(' Done!\n\n');
-    movie_features = getEdgeFeatures(K0);
+    movie_features = getEdgeFeatures2(K0);
 
 elseif example_num==4
     data_path   = ['devel-1-20_valid-1-20'];    % Path to the sample data.
@@ -96,7 +96,7 @@ if training == 1
             [K0, fps]=read_movie([data_dir data_name '.avi']); 
             %[M0, fps]=read_movie([data_dir '/' data_name  '_M_' num2str(movie_num) '.avi']); 
             
-            [movie_features, edge1, edge2] = getEdgeFeatures(K0);
+            [movie_features, edge1, edge2] = getEdgeFeatures2(K0);
             edgeX = [edgeX; edge1];
             edgeY = [edgeY; edge2];
             all_features = [all_features; struct('gesture', movie_features)];
@@ -128,7 +128,7 @@ if validation == 1
     
     K0 = K0(41:89);      
     %get the features in the testing set
-    movie_features = getEdgeFeatures(K0);
+    movie_features = getEdgeFeatures2(K0);
     fprintf(' Done!\n\n');
     
     obsLik = [];
@@ -158,18 +158,6 @@ if validation == 1
                     [D, id] = pdist2(P, T, 'euclidean','Smallest', 1);
                     prob = -(((P(id, 1) - T(:, 1))./120).^2)/(2*sigmaX^2)-(((P(id, 2) - T(:,2))./180).^2)/(2*sigmaY^2);
                     local_prob = sum(prob);
-                    
-%                     m = size(T,1); n = size(P,1);
-%                     [c,p] = sortrows([T;P]);
-%                     q = 1:m+n; q(p) = q;
-%                     t = cumsum(p>m);
-%                     r = 1:n; r(t(q(m+1:m+n))) = r;
-%                     s = t(q(1:m));
-%                     id = r(max(s,1));
-%                     iu = r(min(s+1,n));
-%                     [prob,it] = max([-((((T(:, 1)-P(id, 1))./120).^2)/(2*sigmaX^2)+(((T(:, 2)-P(id, 2))./180).^2)/(2*sigmaY^2)) -((((P(iu, 1)-T(:, 1))./120).^2)/(2*sigmaX^2)+(((P(iu, 2)-T(:, 2))./180).^2)/(2*sigmaY^2))], [], 2);
-%                     
-%                     local_prob = sum(prob);
 
                     % update B -- the emission matrix
                     B(j, frame) = local_prob;
@@ -182,134 +170,80 @@ if validation == 1
                 
                 elseif size(P, 1) ~= 0 && size(T, 1) == 0
                     B(j, frame) = -40;
-                end
-                
-                % get the best match
-%                 global_prob = local_prob;
-%                 if max_global < global_prob
-%                     max_global = global_prob;
-%                     training_gesture_index(frame) = i;
-%                     training_frame_index(frame) = j;
-%                 end
+                end                
             end
 	   end
 	 
        obsLik = [obsLik; struct('B', B)];
-            %fprintf('matched Gesture %d\t',training_gesture_index(frame));
-            %fprintf('Frame %d with probability %f\n',training_frame_index(frame),max_global);
     end
 
     
-    % Temporal Segment gesture
-%     [time, distance] = temporal_segment(K0, M0);
-%     
-%     pathList = [];
-%     classify = [];
-%     % Classify each segment using HMM
-%     for gest = 1:length(time) 
-%         list = [];
-%         
-%         gest 
-%         %for all gestures in training set
-%         for i= 1:length(all_features)
-%             
-%             i
-%             numFrame = length(all_features(i).gesture);
-%             numFrameTest = length(movie_features); 
-%             prior = 1/numFrameTest * ones(numFrame,1);
-%             transmat = makeTransmat(numFrame, 0.9, 0.05, 0.05, 1);
-%             
-%             b =  obsLik(i).B(:,time(gest, 1):time(gest, 2));
-%             if time(gest, 1) == 1 && time(gest, 2) ~= length(movie_features)
-%                 b =  obsLik(i).B(:,time(gest, 1):time(gest, 2)+3);
-%             elseif time(gest, 1) ~= 1 && time(gest, 2) == length(movie_features)
-%                 b =  obsLik(i).B(:,time(gest, 1)-3:time(gest, 2));
-%             elseif time(gest, 1) >= 5 && time(gest, 2) <= length(movie_features)-7
-%                 b =  obsLik(i).B(:,time(gest, 1)-4:time(gest, 2)+7);
-%             end
-%             
-%             [path] = viterbi_path(prior, transmat, b)
-%             
-%             % analyse the path - probability
-%             probabilities = [];
-%             probability = 0;
-%             gesture = 0;
-%             for frame=(length(path)):-1:2
-%                 if (((path(frame) - path(frame-1)) > 0) && (path(frame) == (numFrame)) && (gesture == 0))
-%                     probability = probability+b(path(frame), frame)+log(transmat(path(frame-1), path(frame))) ;
-%                     gesture = frame;
-%                 end
-%                 if (path(frame) < 5 && (gesture - frame) >= 7 && gesture > 0 )
-%                     probabilities = [probabilities; probability];
-%                     probability = 0;
-%                     gesture = 0;
-% 
-%                 elseif (frame == 2 && (gesture - frame) >= 7  && gesture > 0)
-%                     gesture = 0;
-%                     probabilities = [probabilities; probability];
-%                     break;
-%                 end
-%             end
-%             pathList = [pathList; struct('Path',path)];	
-%             
-%             probabilities
-%             if (length(probabilities) > 0)
-%                 [value, index] = max(probabilities);
-%                 list = [list; [value, i]];
-%             end
-%             
-%         end
-% 
-%         %classify 
-%         [value, index] = max(list(:, 1));
-%         
-%         classify = [classify; list(index, 2)];
-%     end
-%     
-% 	classify
-%     
+% Temporal Segment gesture
+    [time, distance] = temporal_segment(K0, M0);
+    
+    endtime = time(size(time,1), 2);
+    
+    if (length(movie_features) - endtime > 30)
+        time(size(time, 1)+1) = [endTime+1 length(movie_features)];
+    end
+    
+    if size(time,1) == 0
+        time = [1, length(movie_features)]
+    end
+    factor = 10^4;
+     mean1 = zeros(10,1);       
+     for i=1:10
+          mean1(i) = mean(mean(obsLik(i).B));
+     end
+     if ceil(mean(mean1)/10^4) <= -5
+         factor = 10^5;
+     end
+    
     pathList = [];
-	for i= 1:length(all_features)
-		i
-		numFrame = length(all_features(i).gesture);
-		numFrameTest = length(movie_features); 
-		prior = 1/numFrameTest * ones(numFrame,1);
-		transmat = makeTransmat(numFrame, 0.9, 0.05, 0.05, 1);
-		[path] = viterbi_path(prior, transmat, obsLik(i).B)
+    classify = [];
+    % Classify each segment using HMM
+    for gest = 1:size(time,1) 
+        list = [];
         
-        b =  obsLik(i).B;
-        % analyse the path - probability
-         probabilities = [];
-         probability = 0;
-         gesture = 0;
-        for frame=2:(length(path))
-            probability = probability + b(path(frame), frame) + log(transmat(path(frame-1), path(frame)));
+        
+        %for all gestures in training set
+        for i= 1:length(all_features)
+            
+            i
+            numFrame = length(all_features(i).gesture);
+            numFrameTest = length(movie_features); 
+            prior = 1/numFrameTest * ones(numFrame,1);
+            transmat = makeTransmat(numFrame, 0.79, 0.01, 0.2, 1);
+            
+            b =  obsLik(i).B(:,time(gest, 1):time(gest, 2));
+            
+            [path] = viterbi_path(prior, transmat, exp(b/factor))
+            
+             probabilities = [];
+             probability = b(path(1), 1);
+             gesture = 0;
+            for frame=2:(length(path))
+                 probability = probability + b(path(frame), frame) + log(transmat(path(frame-1), path(frame)));   
+            end
+            probabilities = [probabilities; probability];
+            
+            
+             probabilities
+             if (length(probabilities) > 0)
+                [value, index] = max(probabilities);
+                list = [list; [value, i]];
+            end
+            
         end
-        probabilities = [probabilities; probability]    
-%         for frame=(length(path)):-1:2
-%             if (((path(frame) - path(frame-1)) > 0) && (path(frame) == (numFrame)) && (gesture == 0))
-%                 probability = probability + b(path(frame), frame) + log(transmat(path(frame-1), path(frame)));
-%                 gesture = frame
-%             
-%             end
-%             elseif (path(frame) < 5 && (gesture - frame) > numFrame/4 && gesture > 0 )
-%                 probabilities = [probabilities; probability];
-%                 probability = 0;
-%                 frame
-%                 gesture = 0;
-%             end
-%             elseif (frame == 2 && (gesture - frame) > 10  && gesture > 0)
-%                 gesture = 0;
-%                 probabilities = [probabilities; probability];
-%                 frame
-%                 break;
-%             end
-%         end
-%         probabilities
+
+        %classify 
+        [value, index] = max(list(:, 1));
         
-		pathList = [pathList; struct('Path',path)];	
-	end
-	
+        classify = [classify; list(index, 2)];
+    end
+    
+	classify
+    	
 end
 
 
