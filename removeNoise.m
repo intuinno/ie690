@@ -60,11 +60,75 @@ while(find(isnan(Inoise3)))
 %	figure, imshow(Inoise3);
 end
 
+for i = 1:m 
+	
+	if Inoise3(i,1) < 3 
+		
+		j = 1;
+		while (Inoise3(i,j ) <3 )
+			j = j + 1;
+		end
+		
+		for k = 1:j
+			
+			Inoise3(i,k) = Inoise3(i,j);
+			
+		end
+		
+	end
+	
+	if Inoise3(i, n) <3 
+		
+		j=1;
+		while(Inoise3(i,n-j) <3) 
+			j= j+1;
+		end
+		
+		for k=1:j
+			Inoise3(i,n+1-k) = Inoise3(i, n-j);
+		end
+		
+	end
+	
+end
 
-Inoise4 = Inoise3(4:237, 4:317);
 
-figure, imshow(uint8(Inoise4));
+for i = 1:n 
+	
+	if Inoise3(1,i) < 3 
+		
+		j = 1;
+		while (Inoise3(j,i ) <3 )
+			j = j + 1;
+		end
+		
+		for k = 1:j
+			
+			Inoise3(k,i) = Inoise3(j,i);
+			
+		end
+		
+	end
+	
+	if Inoise3(m, i) <3 
+		
+		j=1;
+		while(Inoise3(m-j,i) <3) 
+			j= j+1;
+		end
+		
+		for k=1:j
+			Inoise3(m+1-k,i) = Inoise3(m-j,i);
+		end
+		
+	end
+	
+end
 
-removeNoiseImage = Inoise4;
+
+
+figure, imshow(uint8(Inoise3));
+
+removeNoiseImage = Inoise3;
 
 end

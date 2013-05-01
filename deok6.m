@@ -10,7 +10,9 @@ NUM_NOISE_THRESHOLD = 0.05;
 
 %
 colormap(jet);
-I = K0(40).cdata(:,:,1);
+I = K0(1).cdata(:,:,1);
+
+clear K0;
 
 I = removeNoise(I);
 

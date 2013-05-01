@@ -1,54 +1,28 @@
 
 function ret = neighError(x)
 
-	[r c] = find(isnan(x));
 	
-	if length(r) > 0 
 	
-		hasNan = true;
-	end
+
 	
 	
 	if ~isnan(x(2,2))
 		
 		ret = x(2,2);
 		
-	elseif length(r) == 9
-		
-		ret = x(2,2);
+
 		
 	else
 		
-% 		if mean(r) - 2 > 0.3 
-% 			
-% 			rInd = 1;
-% 			
-% 		elseif mean(r) - 2 < -0.3
-% 			
-% 			rInd = 3;
-% 			
-% 		else
-% 			
-% 			rInd =2;
-% 			
-% 		end
-% 		
-% 		
-% 		if mean(c) - 2 > 0.3 
-% 			
-% 			cInd = 1;
-% 			
-% 		elseif mean(c) - 2 < -0.3
-% 			
-% 			cInd = 3;
-% 			
-% 		else
-% 			
-% 			cInd =2;
-% 			
-% 		end
-		
+% 	
+		[r c] = find(isnan(x));
 		[r2 c2] = find(~isnan(x));
+        
+        if length(r) == 9 
+            
+            ret = x(2,2);
+            
+        else 
 
 		dist = 0;
 		
@@ -70,6 +44,9 @@ function ret = neighError(x)
 		
 			
 		ret = x(rInd,cInd);
+        
+        end
+        
 		
 	end
 	
@@ -77,4 +54,3 @@ function ret = neighError(x)
 		
 
 end
-
