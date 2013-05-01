@@ -10,7 +10,7 @@ hx = hy';
 Iy = imfilter(double(I), hy, 'replicate');
 Ix = imfilter(double(I), hx, 'replicate');
 gradmag = sqrt(Ix.^2 + Iy.^2);
-figure, imshow(gradmag,[]), title('Gradient magnitude (gradmag)')
+%figure, image(gradmag,[]), title('Gradient magnitude (gradmag)')
 
 
 %Noise Identification 
@@ -35,7 +35,7 @@ Inoise = (gradmag > NUM_NOISE_GRAD_THRESHOLD) & (I < noiseIndex);
 SE = strel('disk',1,0);
 Inoise = imdilate(Inoise,SE);
 Inoise = imfill(Inoise,'holes');
-figure, imshow(Inoise);
+%figure, imshow(Inoise);
 
 
 [L num] = bwlabel(Inoise);
@@ -51,7 +51,7 @@ Inoise2 = double(I);
 for i=1:length(row)
 	Inoise2(row(i),col(i)) = NaN;
 end
-figure, imshow(Inoise2);
+%figure, imshow(Inoise2);
 
 Inoise3 = Inoise2;
 
@@ -62,10 +62,10 @@ end
 
 for i = 1:m 
 	
-	if Inoise3(i,1) < 3 
+	if Inoise3(i,1) < 5 
 		
 		j = 1;
-		while (Inoise3(i,j ) <3 )
+		while (Inoise3(i,j ) <5 )
 			j = j + 1;
 		end
 		
@@ -77,10 +77,10 @@ for i = 1:m
 		
 	end
 	
-	if Inoise3(i, n) <3 
+	if Inoise3(i, n) <5 
 		
 		j=1;
-		while(Inoise3(i,n-j) <3) 
+		while(Inoise3(i,n-j) <5) 
 			j= j+1;
 		end
 		
@@ -95,10 +95,10 @@ end
 
 for i = 1:n 
 	
-	if Inoise3(1,i) < 3 
+	if Inoise3(1,i) < 5 
 		
 		j = 1;
-		while (Inoise3(j,i ) <3 )
+		while (Inoise3(j,i ) <5 )
 			j = j + 1;
 		end
 		
@@ -110,10 +110,10 @@ for i = 1:n
 		
 	end
 	
-	if Inoise3(m, i) <3 
+	if Inoise3(m, i) <5 
 		
 		j=1;
-		while(Inoise3(m-j,i) <3) 
+		while(Inoise3(m-j,i) <5) 
 			j= j+1;
 		end
 		
@@ -127,7 +127,7 @@ end
 
 
 
-figure, imshow(uint8(Inoise3));
+%figure, imshow(uint8(Inoise3));
 
 removeNoiseImage = Inoise3;
 
